@@ -4,6 +4,12 @@ plugins {
 	id("org.springframework.boot") version "3.4.4"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("org.asciidoctor.jvm.convert") version "3.3.2"
+
+	// Detekt
+	id("io.gitlab.arturbosch.detekt") version "1.23.8"
+
+	// Kover
+	id("org.jetbrains.kotlinx.kover") version "0.9.1"
 }
 
 group = "de.minhperry"

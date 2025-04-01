@@ -1,6 +1,8 @@
 plugins {
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
+	//kotlin("jvm") version "1.9.25"
+	kotlin("jvm") version "2.0.21"
+	//kotlin("plugin.spring") version "1.9.25"
+	kotlin("plugin.spring") version "2.0.21"
 	id("org.springframework.boot") version "3.4.4"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("org.asciidoctor.jvm.convert") version "3.3.2"
@@ -38,12 +40,20 @@ dependencies {
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// JGit
+	implementation("org.eclipse.jgit:org.eclipse.jgit:7.2.0.202503040940-r")
 }
 
 kotlin {
 	compilerOptions {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
 	}
+}
+
+detekt {
+	toolVersion = "1.23.8"
+	config.from("detektConfig.yml")
 }
 
 tasks.withType<Test> {

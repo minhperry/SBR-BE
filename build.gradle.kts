@@ -11,7 +11,7 @@ plugins {
 	id("io.gitlab.arturbosch.detekt") version "1.23.8"
 
 	// Kover
-	id("org.jetbrains.kotlinx.kover") version "0.9.1"
+	id("org.jetbrains.kotlinx.kover") version "0.6.1"
 }
 
 group = "de.minhperry"
@@ -56,12 +56,25 @@ detekt {
 	config.from("detektConfig.yml")
 }
 
+kover {
+	filters {
+		classes {
+			excludes += listOf(
+				"de.minhperry.srb.SrbApplicationKt*",
+				"de.minhperry.srb.constant.*",
+			)
+		}
+	}
+}
+
+
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
 tasks.test {
 	outputs.dir(project.extra["snippetsDir"]!!)
+	finalizedBy(tasks.koverReport)
 }
 
 tasks.asciidoctor {

@@ -36,7 +36,8 @@ class GitService(
     }
 
     /**
-     * Pulls the latest changes from the remote repository.
+     * Pulls the latest changes from the remote repository. Will always succeed since the repository is not modified
+     * locally.
      * @return true if the repository was pulled successfully, false otherwise.
      */
     fun pull() {

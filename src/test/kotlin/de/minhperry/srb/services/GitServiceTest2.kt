@@ -112,6 +112,8 @@ class GitServiceTest2 {
         every { mPullCmd.call() } returns mPullRes
         every { mPullRes.isSuccessful } returns true
 
+        every { mGit.close() } returns Unit
+
         gitService.pull()
 
         verify {

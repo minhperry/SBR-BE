@@ -41,13 +41,14 @@ class GitService(
      * @return true if the repository was pulled successfully, false otherwise.
      */
     fun pull() {
+        val localDir = File(localPath)
         // If the repository does not exist, do not pull
-        if (!repoDir.exists() || !File(repoDir, ".git").exists()) {
+        if (!localDir.exists() || !File(localDir, ".git").exists()) {
             throw IllegalStateException("Repository does not exist! Cannot pull!")
         }
 
         logger.info("Pulling latest changes from repository")
-        Git.open(repoDir).use { git ->
+        Git.open(localDir).use { git ->
             git.pull().call()
             logger.info("Pulling latest changes from repository successful!")
         }

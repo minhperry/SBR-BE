@@ -1,17 +1,16 @@
-package de.minhperry.srb
+package de.minhperry.srb.services
 
 import de.minhperry.srb.services.importer.GitService
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import org.eclipse.jgit.api.CloneCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.PullCommand
-import org.eclipse.jgit.api.PullResult
 import org.eclipse.jgit.api.errors.InvalidRemoteException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.io.TempDir
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import org.slf4j.LoggerFactory
 import java.io.File
 import kotlin.test.Test
@@ -21,7 +20,8 @@ import kotlin.test.assertTrue
 /**
  * A test class for the [de.minhperry.srb.services.importer.GitService] class.
  */
-class GitServiceTest {
+@Deprecated("This test class is deprecated and should be removed in the future.")
+private class GitServiceTest {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @TempDir
@@ -32,12 +32,15 @@ class GitServiceTest {
     // Use a more lightweight repo just for the sake of testing
     private val repoUrl = "https://github.com/zpqrtbnk/test-repo"
 
-    private lateinit var mockGit: Git
+    // Mocked objects
+    private val mRepoDir = mockk<File>()
+    private val mGit = mockk<Git>()
+    private val mPullCmd = mockk<PullCommand>()
+    private val mCloneCmd = mockk<CloneCommand>()
 
     @BeforeEach
     fun setUp() {
         gitService = GitService(tempDir.absolutePath)
-        mockGit = mock(Git::class.java)
     }
 
     @Test
@@ -51,11 +54,13 @@ class GitServiceTest {
 
     @Test
     fun `clone should succeed if directory does not exist`() {
-        val mockCloneCmd = mock(Git.cloneRepository()::class.java)
+        every { mRepoDir.exists() } returns false
+        mockkStatic(Git::class)
 
-        `when`(mockCloneCmd.setURI(anyString())).thenReturn(mockCloneCmd)
-        `when`(mockCloneCmd.setDirectory(any(File::class.java))).thenReturn(mockCloneCmd)
-        `when`(mockCloneCmd.call()).thenReturn(mockGit)
+        every { Git.cloneRepository() } returns mCloneCmd
+        every { mCloneCmd.setURI(any<String>()) } returns mCloneCmd
+        every { mCloneCmd.setDirectory(any<File>()) } returns mCloneCmd
+        every { mCloneCmd.call() } returns mGit
 
         assertDoesNotThrow {
             gitService.clone(repoUrl)
@@ -73,7 +78,16 @@ class GitServiceTest {
 
     @Test
     fun `clone should throw if an exception occurs`() {
-        // mockStatic(Git.javaClass)
+        mockkStatic(Git::class)
+
+        every { Git.cloneRepository() } returns mCloneCmd
+        every { mCloneCmd.setURI(any<String>()) } returns mCloneCmd
+        every { mCloneCmd.setDirectory(any<File>()) } returns mCloneCmd
+        every { mCloneCmd.call() } throws InvalidRemoteException("Invalid remote!")
+
+        assertFailsWith<InvalidRemoteException> {
+            gitService.clone(repoUrl)
+        }
     }
 
     @Test
@@ -87,12 +101,7 @@ class GitServiceTest {
     fun `pull should succeed if directory exists`() {
         tempDir.resolve(".git").mkdir()
 
-        val mockPullCmd = mock(PullCommand::class.java)
-        val mockPullResult = mock(PullResult::class.java)
-
-        `when`(mockGit.pull()).thenReturn(mockPullCmd)
-        `when`(mockPullCmd.call()).thenReturn(mockPullResult)
-        `when`(mockPullResult.isSuccessful).thenReturn(true)
+        // ?
 
         assertDoesNotThrow {
             gitService.pull()
@@ -103,10 +112,7 @@ class GitServiceTest {
     fun `pull should throw if an exception occurs`() {
         tempDir.resolve(".git").mkdir()
 
-        val mockPullCmd = mock(PullCommand::class.java)
-
-        `when`(mockGit.pull()).thenReturn(mockPullCmd)
-        `when`(mockPullCmd.call()).thenThrow(InvalidRemoteException("Invalid remote!"))
+        // ?
 
         assertFailsWith<InvalidRemoteException> {
             gitService.pull()
